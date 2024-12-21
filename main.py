@@ -8,7 +8,7 @@ from pytmx.util_pygame import load_pygame
 from groups import AllSprites
 
 
-# dsdadadadaadadadaawd
+# dsdadadadaadadadaawdвфц
 
 class Game():
     def __init__(self):

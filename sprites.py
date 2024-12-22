@@ -22,7 +22,7 @@ class Gun(pygame.sprite.Sprite):
     def __init__(self, player, groups):
         # player connection
         self.player = player
-        self.distance = 140
+        self.distance = 30
         self.player_direction = pygame.Vector2(1, 0)
 
         # sprite setup
@@ -56,14 +56,22 @@ class Bullet(pygame.sprite.Sprite):
         self.image = surf
         self.rect = self.image.get_rect(center=pos)
         self.spawn_time = pygame.time.get_ticks()
-        self.life_time = 1000
+        self.life_time = 50
 
         self.direction = direction
-        self.speed = 1500
+        self.speed = 500
+
+    def rotate_gun(self):
+        angle = degrees(atan2(self.direction.x, self.direction.y))-90
+        if self.direction.x > 0:
+            self.image = pygame.transform.rotozoom(self.image, angle, 1)
+        else:
+            self.image = pygame.transform.rotozoom(self.image, abs(angle), 1)
+            self.image = pygame.transform.flip(self.image, False, True)
 
     def update(self, dt):
         self.rect.center += self.speed * dt * self.direction
-
+        self.rotate_gun()
         if pygame.time.get_ticks() - self.spawn_time >= self.life_time:
             self.kill()
 
@@ -85,7 +93,7 @@ class Enemy(pygame.sprite.Sprite):
 
         self.collision_sprites = collision_sprites
         self.direction = pygame.Vector2()
-        self.speed = 350
+        self.speed = 250
 
         self.death_time = 0
         self.death_duration = 400
@@ -125,8 +133,9 @@ class Enemy(pygame.sprite.Sprite):
         surf = pygame.mask.from_surface(self.frames[0]).to_surface()
         surf.set_colorkey("black")
         self.image = surf
+
     def death_timer(self):
-        if pygame.time.get_ticks() - self.death_time>=self.death_duration:
+        if pygame.time.get_ticks() - self.death_time >= self.death_duration:
             self.kill()
 
     def update(self, dt):

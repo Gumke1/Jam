@@ -17,6 +17,8 @@ class Game():
         pygame.display.set_caption("lol")
         self.clock = pygame.time.Clock()
         self.running = True
+        self.first_lock = True
+        self.enemy_lock = True
 
         self.all_sprites = AllSprites()
         self.collision_sprites = pygame.sprite.Group()
@@ -68,21 +70,24 @@ class Game():
                 self.can_shoot = True
 
     def setup(self):  # draw map recode
-        map = load_pygame(join('data', 'maps', 'world.tmx'))
+        map = load_pygame(join('data', 'maps', 'world(2).tmx'))
 
-        for x, y, image in map.get_layer_by_name("Ground").tiles():
+        for x, y, image in map.get_layer_by_name("1").tiles():
             Sprite((x * TILE_SIZE, y * TILE_SIZE), image, self.all_sprites)
-        for obj in map.get_layer_by_name('Objects'):
-            CollisionSprite((obj.x, obj.y), obj.image, (self.all_sprites, self.collision_sprites))
+        for x, y, image in map.get_layer_by_name("2").tiles():
+            Sprite((x * TILE_SIZE, y * TILE_SIZE), image, self.all_sprites)
+        for x, y, image in map.get_layer_by_name("3").tiles():
+            Sprite((x * TILE_SIZE, y * TILE_SIZE), image, self.all_sprites)
 
-        for obj in map.get_layer_by_name('Collisions'):
+        for obj in map.get_layer_by_name('object 1'):
             CollisionSprite((obj.x, obj.y), pygame.Surface((obj.width, obj.height)), self.collision_sprites)
-        for obj in map.get_layer_by_name("Entities"):
+        for obj in map.get_layer_by_name("object 2"):
             if obj.name == "Player":
                 self.player = Player((obj.x, obj.y), self.all_sprites, self.collision_sprites)
                 self.gun = Gun(self.player, self.all_sprites)
-            else:
+            elif obj.name == "Enemy":
                 self.spawn_positions.append((obj.x, obj.y))
+                self.enemy_lock = False
 
     def bullet_collision(self):
         if self.bullet_sprites:
@@ -106,10 +111,14 @@ class Game():
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
-                if event.type == self.enemy_event:
+                if event.type == self.enemy_event and not self.enemy_lock:
                     Enemy(random.choice(self.spawn_positions), random.choice(list(self.enemy_frames.values())),
                           (self.all_sprites, self.enemy_sprites),
                           self.player, self.collision_sprites)
+
+
+
+
 
             # update
             self.gun_timer()
